@@ -35,24 +35,17 @@ pub fn crypto_hash_sha512(message: &str) -> Option<Vec<u8>> {
 }
 
 pub fn crypto_box_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
-    let public_key = [0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES].as_mut_ptr();
-    let secret_key = [0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES].as_mut_ptr();
+    let mut public_key = [0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES];
+    let mut secret_key = [0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES];
     unsafe {
-        let res = crypto_box_curve25519xsalsa20poly1305_ref_keypair(public_key, secret_key);
+        let res = crypto_box_curve25519xsalsa20poly1305_ref_keypair(
+            public_key.as_mut_ptr(),
+            secret_key.as_mut_ptr(),
+        );
         if res == -1 {
             return None;
         } else {
-            let hash_pk = std::slice::from_raw_parts(
-                public_key,
-                CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES,
-            );
-            let hash_sk = std::slice::from_raw_parts(
-                secret_key,
-                CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES,
-            );
-            let owned_hash_pk = hash_pk.to_owned();
-            let owned_hash_sk = hash_sk.to_owned();
-            Some((owned_hash_pk, owned_hash_sk))
+            Some((public_key.to_vec(), secret_key.to_vec()))
         }
     }
 }
@@ -74,9 +67,10 @@ pub fn crypto_box(message: &str, nonce: Vec<u8>, pk: Vec<u8>, sk: Vec<u8>) -> Op
         );
         if ret == -1 {
             return None;
+        } else {
+            Some(cypher_text)
         }
     }
-    Some(cypher_text)
 }
 
 extern "C" {
