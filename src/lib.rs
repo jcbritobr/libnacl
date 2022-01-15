@@ -8,28 +8,24 @@ pub const CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_BOXZEROBYTES: usize = 16;
 
 pub fn crypto_hash_sha256(message: &str) -> Option<Vec<u8>> {
     unsafe {
-        let hash = [0u8; CRYPTO_HASH_SHA256_BYTES].as_mut_ptr();
-        let _res = crypto_hash_sha256_ref(hash, message.as_ptr(), message.len());
+        let mut hash = [0u8; CRYPTO_HASH_SHA256_BYTES];
+        let _res = crypto_hash_sha256_ref(hash.as_mut_ptr(), message.as_ptr(), message.len());
         if _res == -1 {
             return None;
         } else {
-            let data = std::slice::from_raw_parts(hash, CRYPTO_HASH_SHA256_BYTES);
-            let owned_hash = data.to_owned();
-            Some(owned_hash)
+            Some(hash.to_vec())
         }
     }
 }
 
 pub fn crypto_hash_sha512(message: &str) -> Option<Vec<u8>> {
     unsafe {
-        let hash = [0u8; CRYPTO_HASH_SHA512_BYTES].as_mut_ptr();
-        let _res = crypto_hash_sha512_ref(hash, message.as_ptr(), message.len());
+        let mut hash = [0u8; CRYPTO_HASH_SHA512_BYTES];
+        let _res = crypto_hash_sha512_ref(hash.as_mut_ptr(), message.as_ptr(), message.len());
         if _res == -1 {
             return None;
         } else {
-            let data = std::slice::from_raw_parts(hash, CRYPTO_HASH_SHA512_BYTES);
-            let owned_hash = data.to_owned();
-            Some(owned_hash)
+            Some(hash.to_vec())
         }
     }
 }
@@ -97,7 +93,7 @@ mod tests {
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES,
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES,
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES, CRYPTO_HASH_SHA256_BYTES,
-        CRYPTO_HASH_SHA512_BYTES,
+        CRYPTO_HASH_SHA512_BYTES, CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES,
     };
 
     #[test]
@@ -133,10 +129,11 @@ mod tests {
         let message = "The quick brown fox jumped over the lazy dog";
         let nonce = Vec::<u8>::with_capacity(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES);
         let cypher_text = crypto_box(message, nonce, pk, sk);
-        assert_ne!(None, cypher_text);
+        let result = cypher_text.unwrap();
         assert_eq!(
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            &cypher_text.unwrap()[..16]
+            &result[..16]
         );
+        assert_eq!(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES + message.len(), result.len());
     }
 }
