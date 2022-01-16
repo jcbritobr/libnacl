@@ -1,3 +1,5 @@
+use std::vec;
+
 pub const CRYPTO_HASH_SHA256_BYTES: usize = 32;
 pub const CRYPTO_HASH_SHA512_BYTES: usize = 64;
 pub const CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES: usize = 32;
@@ -69,6 +71,30 @@ pub fn crypto_box(message: &str, nonce: Vec<u8>, pk: Vec<u8>, sk: Vec<u8>) -> Op
     }
 }
 
+pub fn crypto_box_open(
+    cipher_text: Vec<u8>,
+    nonce: Vec<u8>,
+    pk: Vec<u8>,
+    sk: Vec<u8>,
+) -> Option<Vec<u8>> {
+    let mut plain_message = vec![0u8; cipher_text.len()];
+    unsafe {
+        let res = crypto_box_curve25519xsalsa20poly1305_ref_open(
+            plain_message.as_mut_ptr(),
+            cipher_text.as_ptr(),
+            cipher_text.len(),
+            nonce.as_ptr(),
+            pk.as_ptr(),
+            sk.as_ptr(),
+        );
+        if res == -1 {
+            return None;
+        } else {
+            Some(plain_message)
+        }
+    }
+}
+
 extern "C" {
     fn crypto_hash_sha256_ref(hash: *mut u8, message: *const u8, message_len: usize) -> i32;
     fn crypto_hash_sha512_ref(hash: *mut u8, message: *const u8, message_len: usize) -> i32;
@@ -84,16 +110,25 @@ extern "C" {
         public_key: *mut u8,
         secret_key: *mut u8,
     ) -> i32;
+    fn crypto_box_curve25519xsalsa20poly1305_ref_open(
+        message: *mut u8,
+        cipher_text: *const u8,
+        cipher_length: usize,
+        nonce: *const u8,
+        public_key: *const u8,
+        secret_key: *const u8,
+    ) -> i32;
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        crypto_box, crypto_box_keypair, crypto_hash_sha256, crypto_hash_sha512,
+        crypto_box, crypto_box_keypair, crypto_box_open, crypto_hash_sha256, crypto_hash_sha512,
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES,
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES,
-        CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES, CRYPTO_HASH_SHA256_BYTES,
-        CRYPTO_HASH_SHA512_BYTES, CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES,
+        CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES,
+        CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES, CRYPTO_HASH_SHA256_BYTES,
+        CRYPTO_HASH_SHA512_BYTES,
     };
 
     #[test]
@@ -128,12 +163,39 @@ mod tests {
         let (pk, sk) = crypto_box_keypair().unwrap();
         let message = "The quick brown fox jumped over the lazy dog";
         let nonce = Vec::<u8>::with_capacity(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES);
-        let cypher_text = crypto_box(message, nonce, pk, sk);
-        let result = cypher_text.unwrap();
+        let result = crypto_box(message, nonce, pk, sk).unwrap();
         assert_eq!(
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             &result[..16]
         );
-        assert_eq!(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES + message.len(), result.len());
+        assert_eq!(
+            CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES + message.len(),
+            result.len()
+        );
+    }
+
+    #[test]
+    fn test_crypto_box_open() {
+        let (alice_pk, alice_sk) = crypto_box_keypair().unwrap();
+        let (bob_pk, bob_sk) = crypto_box_keypair().unwrap();
+
+        let message = "The quick brown fox jumped over the lazy dog";
+        let nonce = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES];
+        let nonce_to_open = nonce.clone();
+        let crypto_text = crypto_box(message, nonce, bob_pk, alice_sk).unwrap();
+
+        let decrypted_message =
+            crypto_box_open(crypto_text, nonce_to_open, alice_pk, bob_sk).unwrap();
+        assert_eq!(
+            message,
+            std::str::from_utf8(
+                &decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
+            )
+            .unwrap()
+        );
+        assert_eq!(
+            message.as_bytes().to_vec(),
+            decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
+        );
     }
 }
