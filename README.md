@@ -45,10 +45,6 @@ $ cargo test
         )
         .unwrap()
     );
-    assert_eq!(
-        message.as_bytes().to_vec(),
-        decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
-    );
 ```
 
 * Sign
