@@ -7,7 +7,9 @@ Of course, other libraries already exist for these core operations. NaCl advance
 - [x] Crypto Box 
 - [ ] Crypto Secret Box 
 - [x] Crypto Hash
-- [ ] Crypto Sign 
+- [ ] Crypto Sign
+- [ ] Documentation
+- [x] Tests
 
 # References
 

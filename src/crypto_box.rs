@@ -13,7 +13,7 @@ pub fn crypto_box_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
             secret_key.as_mut_ptr(),
         );
         if res == -1 {
-            return None;
+            None
         } else {
             Some((public_key.to_vec(), secret_key.to_vec()))
         }
@@ -36,7 +36,7 @@ pub fn crypto_box(message: &str, nonce: Vec<u8>, pk: Vec<u8>, sk: Vec<u8>) -> Op
             sk.as_ptr(),
         );
         if ret == -1 {
-            return None;
+            None
         } else {
             Some(cypher_text)
         }
@@ -60,7 +60,7 @@ pub fn crypto_box_open(
             sk.as_ptr(),
         );
         if res == -1 {
-            return None;
+            None
         } else {
             Some(plain_message)
         }
