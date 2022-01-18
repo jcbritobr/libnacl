@@ -28,7 +28,7 @@ $ cargo test
     assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
 ```
 
-* **Secrec Key Encryption**
+* **Secret Key Encryption**
 
 * **Public Key Encryption**
 ```rust
