@@ -28,7 +28,9 @@ $ cargo test
     assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
 ```
 
-* **Assymetric Cryptography (Box)**
+* **Secrec Key Encryption**
+
+* **Public Key Encryption**
 ```rust
     // Alice and Bob exchanges their public keys
     let (alice_pk, alice_sk) = crypto_box_keypair().unwrap();
@@ -52,7 +54,7 @@ $ cargo test
     );
 ```
 
-* **Sign**
+* **Digital Signatures**
 ``` rust
     let (pk, sk) = crypto_sign_keypair().unwrap();
     let message = "The quick brownfox jumps over the lazy dog";
@@ -69,3 +71,5 @@ $ cargo test
 https://nacl.cr.yp.to/
 
 [PDF](https://cr.yp.to/highspeed/coolnacl-20120725.pdf) - Daniel J. Bernstein, Tanja Lange, Peter Schwabe, "The security impact of a new cryptographic library"
+
+[PyNacl](https://pynacl.readthedocs.io/en/latest/)
