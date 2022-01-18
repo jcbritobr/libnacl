@@ -116,7 +116,7 @@ mod tests {
     #[test]
     fn test_crypto_box() {
         let (pk, sk) = crypto_box_keypair().unwrap();
-        let message = "The quick brown fox jumped over the lazy dog";
+        let message = "The quick brown fox jumps over the lazy dog";
         let nonce = Vec::<u8>::with_capacity(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES);
         let result = crypto_box(message, nonce, pk, sk).unwrap();
         assert_eq!(
@@ -134,7 +134,7 @@ mod tests {
         let (alice_pk, alice_sk) = crypto_box_keypair().unwrap();
         let (bob_pk, bob_sk) = crypto_box_keypair().unwrap();
 
-        let message = "The quick brown fox jumped over the lazy dog";
+        let message = "The quick brown fox jumps over the lazy dog";
         let nonce = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES];
         let nonce_to_open = nonce.clone();
         let crypto_text = crypto_box(message, nonce, bob_pk, alice_sk).unwrap();
@@ -147,10 +147,6 @@ mod tests {
                 &decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
             )
             .unwrap()
-        );
-        assert_eq!(
-            message.as_bytes().to_vec(),
-            decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
         );
     }
 }

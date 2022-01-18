@@ -38,14 +38,14 @@ mod tests {
 
     #[test]
     fn test_crypto_hash_sha256_ref() {
-        let message = "The quick brown fox jumped over the lazy dog";
+        let message = "The quick brown fox jumps over the lazy dog";
         let hash_256 = crypto_hash_sha256(message.as_bytes().to_vec()).unwrap();
         assert_eq!(CRYPTO_HASH_SHA256_BYTES, hash_256.len());
     }
 
     #[test]
     fn test_crypto_hash_sha512_ref() {
-        let message = "The quick brown fox jumped over the lazy dog";
+        let message = "The quick brown fox jumps over the lazy dog";
         let hash_512 = crypto_hash_sha512(message.as_bytes().to_vec()).unwrap();
         assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
     }
