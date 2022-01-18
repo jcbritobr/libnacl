@@ -11,19 +11,24 @@ Of course, other libraries already exist for these core operations. NaCl advance
 - [ ] Documentation
 - [x] Tests
 
-* Test
+* **Build**
+```
+$ cargo build --release
+```
+
+* **Test**
 ```
 $ cargo test
 ```
 
-* Hashing
+* **Hashing**
 ``` rust
     let message = "The quick brown fox jumps over the lazy dog";
     let hash_512 = crypto_hash_sha512(message.as_bytes().to_vec()).unwrap();
     assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
 ```
 
-* Assymetric Cryptography (Box)
+* **Assymetric Cryptography (Box)**
 ```rust
     // Alice and Bob exchanges their public keys
     let (alice_pk, alice_sk) = crypto_box_keypair().unwrap();
@@ -33,7 +38,7 @@ $ cargo test
     let nonce = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES];
     let nonce_to_open = nonce.clone();
     // Alice encrypts and authenticates a message with her secret key and Bobs public key
-    let crypto_text = crypto_box(message, nonce, bob_pk, alice_sk).unwrap();
+    let crypto_text = crypto_box(message.as_bytes().to_vec(), nonce, bob_pk, alice_sk).unwrap();
 
     // Bob decrypts and validates Alices message with his secret key and Alices public key
     let decrypted_message =
@@ -47,7 +52,7 @@ $ cargo test
     );
 ```
 
-* Sign
+* **Sign**
 ``` rust
     let (pk, sk) = crypto_sign_keypair().unwrap();
     let message = "The quick brownfox jumps over the lazy dog";
