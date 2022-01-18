@@ -7,9 +7,61 @@ Of course, other libraries already exist for these core operations. NaCl advance
 - [x] Crypto Box 
 - [ ] Crypto Secret Box 
 - [x] Crypto Hash
-- [ ] Crypto Sign
+- [x] Crypto Sign
 - [ ] Documentation
 - [x] Tests
+
+* Test
+```
+$ cargo test
+```
+
+* Hashing
+``` rust
+    let message = "The quick brown fox jumped over the lazy dog";
+    let hash_512 = crypto_hash_sha512(message.as_bytes().to_vec()).unwrap();
+    assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
+```
+
+* Assymetric Cryptography (Box)
+```rust
+    // Alice and Bob exchanges their public keys
+    let (alice_pk, alice_sk) = crypto_box_keypair().unwrap();
+    let (bob_pk, bob_sk) = crypto_box_keypair().unwrap();
+
+    let message = "The quick brown fox jumped over the lazy dog";
+    let nonce = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES];
+    let nonce_to_open = nonce.clone();
+    // Alice encrypts and authenticates a message with her secret key and Bobs public key
+    let crypto_text = crypto_box(message, nonce, bob_pk, alice_sk).unwrap();
+
+    // Bob decrypts and validates Alices message with his public key
+    let decrypted_message =
+        crypto_box_open(crypto_text, nonce_to_open, alice_pk, bob_sk).unwrap();
+    assert_eq!(
+        message,
+        std::str::from_utf8(
+            &decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
+        )
+        .unwrap()
+    );
+    assert_eq!(
+        message.as_bytes().to_vec(),
+        decrypted_message[CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES..]
+    );
+```
+
+* Sign
+``` rust
+    let (pk, sk) = crypto_sign_keypair().unwrap();
+    let message = "The quick brownfox jumps over the lazy dog";
+    let signed_message = crypto_sign(message.as_bytes().to_vec(), sk).unwrap();
+    let validated_message = crypto_sign_open(signed_message, pk).unwrap();
+    let validated_message = std::str::from_utf8(&validated_message)
+        .unwrap()
+        .trim_matches(char::from(0));
+    assert_eq!(message, validated_message);
+```
 
 # References
 
