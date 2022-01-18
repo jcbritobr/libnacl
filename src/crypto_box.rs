@@ -20,9 +20,9 @@ pub fn crypto_box_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
     }
 }
 
-pub fn crypto_box(message: &str, nonce: Vec<u8>, pk: Vec<u8>, sk: Vec<u8>) -> Option<Vec<u8>> {
+pub fn crypto_box(message: Vec<u8>, nonce: Vec<u8>, pk: Vec<u8>, sk: Vec<u8>) -> Option<Vec<u8>> {
     let mut owned_message_zeros = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES];
-    owned_message_zeros.extend_from_slice(message.as_bytes());
+    owned_message_zeros.extend_from_slice(&message);
     let mut cypher_text =
         vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES + message.len()];
 
@@ -118,7 +118,7 @@ mod tests {
         let (pk, sk) = crypto_box_keypair().unwrap();
         let message = "The quick brown fox jumps over the lazy dog";
         let nonce = Vec::<u8>::with_capacity(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES);
-        let result = crypto_box(message, nonce, pk, sk).unwrap();
+        let result = crypto_box(message.as_bytes().to_vec(), nonce, pk, sk).unwrap();
         assert_eq!(
             &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             &result[..16]
@@ -137,7 +137,7 @@ mod tests {
         let message = "The quick brown fox jumps over the lazy dog";
         let nonce = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES];
         let nonce_to_open = nonce.clone();
-        let crypto_text = crypto_box(message, nonce, bob_pk, alice_sk).unwrap();
+        let crypto_text = crypto_box(message.as_bytes().to_vec(), nonce, bob_pk, alice_sk).unwrap();
 
         let decrypted_message =
             crypto_box_open(crypto_text, nonce_to_open, alice_pk, bob_sk).unwrap();
