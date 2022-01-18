@@ -35,7 +35,7 @@ $ cargo test
     // Alice encrypts and authenticates a message with her secret key and Bobs public key
     let crypto_text = crypto_box(message, nonce, bob_pk, alice_sk).unwrap();
 
-    // Bob decrypts and validates Alices message with his public key
+    // Bob decrypts and validates Alices message with his secret key and Alices public key
     let decrypted_message =
         crypto_box_open(crypto_text, nonce_to_open, alice_pk, bob_sk).unwrap();
     assert_eq!(
