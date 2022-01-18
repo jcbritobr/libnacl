@@ -18,7 +18,7 @@ $ cargo test
 
 * Hashing
 ``` rust
-    let message = "The quick brown fox jumped over the lazy dog";
+    let message = "The quick brown fox jumps over the lazy dog";
     let hash_512 = crypto_hash_sha512(message.as_bytes().to_vec()).unwrap();
     assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
 ```
@@ -29,7 +29,7 @@ $ cargo test
     let (alice_pk, alice_sk) = crypto_box_keypair().unwrap();
     let (bob_pk, bob_sk) = crypto_box_keypair().unwrap();
 
-    let message = "The quick brown fox jumped over the lazy dog";
+    let message = "The quick brown fox jumps over the lazy dog";
     let nonce = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES];
     let nonce_to_open = nonce.clone();
     // Alice encrypts and authenticates a message with her secret key and Bobs public key
