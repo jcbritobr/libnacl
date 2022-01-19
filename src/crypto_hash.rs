@@ -1,7 +1,7 @@
 pub const CRYPTO_HASH_SHA256_BYTES: usize = 32;
 pub const CRYPTO_HASH_SHA512_BYTES: usize = 64;
 
-/// The crypto_hash_sha256 function hashes a Vec\<u8\> message. It returns a Vec\<u8\> hash.
+/// The crypto_hash_sha256 function hashes a Vec\<u8\> message. It returns a Vec\<u8\> hash or None in case of failure.
 /// The output length is always CRYPTO_HASH_SHA256_BYTES.
 /// 
 /// ## Examples
@@ -26,8 +26,9 @@ pub fn crypto_hash_sha256(message: Vec<u8>) -> Option<Vec<u8>> {
     }
 }
 
-/// The crypto_hash_sha512 function hashes a Vec\<u8\> message. It returns a Vec\<u8\> hash.
+/// The crypto_hash_sha512 function hashes a Vec\<u8\> message. It returns a Vec\<u8\> hash or None in case of failure.
 /// The output length is always CRYPTO_HASH_SHA512_BYTES.
+/// 
 /// ## Examples
 /// 
 /// ```
@@ -36,7 +37,6 @@ pub fn crypto_hash_sha256(message: Vec<u8>) -> Option<Vec<u8>> {
 /// let message = "The quick brown fox jumps over the lazy dog";
 /// let hash_512 = crypto_hash_sha512(message.as_bytes().to_vec()).unwrap();
 /// assert_eq!(CRYPTO_HASH_SHA512_BYTES, hash_512.len());
-/// 
 /// ```
 pub fn crypto_hash_sha512(message: Vec<u8>) -> Option<Vec<u8>> {
     unsafe {

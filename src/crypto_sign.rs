@@ -2,9 +2,9 @@ pub const CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES: usize = 64;
 pub const CRYPTO_SIGN_EDWARDS25519SHA512BATCH_PUBLICKEYBYTES: usize = 32;
 pub const CRYPTO_SIGN_EDWARDS25519SHA512BATCH_BYTES: usize = 64;
 
-/// The function crypto_sign_keypair returns a tuple with the public key and secret key respectivelly.
+/// The function crypto_sign_keypair returns a tuple with the randomly public key and secret key respectivelly.
 /// The keys have sizes **CRYPTO_SIGN_EDWARDS25519SHA512BATCH_PUBLICKEYBYTES** for public key and
-/// **CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES** for private key.
+/// **CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES** for secret key.
 /// 
 /// ## Examples
 /// 
@@ -28,6 +28,25 @@ pub fn crypto_sign_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
     }
 }
 
+/// The crypto_sign function signs a Vec\<u8\> message using the signer's Vec\<u8\> secret key sk.
+/// The crypto_sign function returns the resulting Vec\<u8\> signed message. The function returns None if sk.len()
+/// is not CRYPTO_SIGN_EDWARDS25519SHA512BATCH_BYTES.
+/// 
+/// ## Examples
+/// 
+/// ```
+/// use libnacl::crypto_sign::*;
+/// 
+/// let (_, sk) = crypto_sign_keypair().unwrap();
+/// let message = "The quick brownfox jumps over the lazy dog";
+/// let signed_message = crypto_sign(message.as_bytes().to_vec(), sk).unwrap();
+/// let data_from_signed = std::str::from_utf8(&signed_message[32..][..message.len()]).unwrap();
+/// assert_eq!(message, data_from_signed);
+/// assert_eq!(
+///     message.len() + CRYPTO_SIGN_EDWARDS25519SHA512BATCH_BYTES,
+///     signed_message.len()
+/// );
+/// ```
 pub fn crypto_sign(message: Vec<u8>, sk: Vec<u8>) -> Option<Vec<u8>> {
     let mut smlen: usize = 0;
     let mut signed_message = vec![0u8; message.len() + CRYPTO_SIGN_EDWARDS25519SHA512BATCH_BYTES];
@@ -48,6 +67,23 @@ pub fn crypto_sign(message: Vec<u8>, sk: Vec<u8>) -> Option<Vec<u8>> {
     }
 }
 
+/// The crypto_sign_open function verifies the signature in Vec\<u8\> signed_message using the signer's Vec\<u8\> public key pk.
+/// The crypto_sign_open function returns the Vec\<u8\> validated message or None in case validation fails.
+/// 
+/// #Examples
+/// 
+/// ```
+/// use libnacl::crypto_sign::*;
+///  
+/// let (pk, sk) = crypto_sign_keypair().unwrap();
+/// let message = "The quick brownfox jumps over the lazy dog";
+/// let signed_message = crypto_sign(message.as_bytes().to_vec(), sk).unwrap();
+/// let validated_message = crypto_sign_open(signed_message, pk).unwrap();
+/// let validated_message = std::str::from_utf8(&validated_message)
+///    .unwrap()
+///    .trim_matches(char::from(0));
+/// assert_eq!(message, validated_message);
+/// ``` 
 pub fn crypto_sign_open(signed_message: Vec<u8>, public_key: Vec<u8>) -> Option<Vec<u8>> {
     let mut plain_message = vec![0u8; signed_message.len()];
     let mut _plain_message_len: usize = 0;
