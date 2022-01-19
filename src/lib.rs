@@ -51,7 +51,6 @@ pub mod crypto_hash;
 /// Digital signatures allow you to publish a public key, and then you can use your private signing key to sign messages. Others who have your
 /// public key can then use it to validate that your messages are actually authentic.
 pub mod crypto_sign;
-pub mod crypto_utils;
 
 #[cfg(test)]
 mod tests {

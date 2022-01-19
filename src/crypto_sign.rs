@@ -2,6 +2,19 @@ pub const CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES: usize = 64;
 pub const CRYPTO_SIGN_EDWARDS25519SHA512BATCH_PUBLICKEYBYTES: usize = 32;
 pub const CRYPTO_SIGN_EDWARDS25519SHA512BATCH_BYTES: usize = 64;
 
+/// The function crypto_sign_keypair returns a tuple with the public key and secret key respectivelly.
+/// The keys have sizes **CRYPTO_SIGN_EDWARDS25519SHA512BATCH_PUBLICKEYBYTES** for public key and
+/// **CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES** for private key.
+/// 
+/// ## Examples
+/// 
+/// ```
+/// use libnacl::crypto_sign::*;
+/// 
+/// let (pk, sk) = crypto_sign_keypair().unwrap();
+/// assert_eq!(CRYPTO_SIGN_EDWARDS25519SHA512BATCH_PUBLICKEYBYTES, pk.len());
+/// assert_eq!(CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES, sk.len());
+/// ```
 pub fn crypto_sign_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
     let mut pk = vec![0u8; CRYPTO_SIGN_EDWARDS25519SHA512BATCH_PUBLICKEYBYTES];
     let mut sk = vec![0u8; CRYPTO_SIGN_EDWARDS25519SHA512BATCH_SECRETKEYBYTES];
