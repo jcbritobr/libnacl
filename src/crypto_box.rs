@@ -4,6 +4,19 @@ pub const CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES: usize = 24;
 pub const CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES: usize = 32;
 pub const CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_BOXZEROBYTES: usize = 16;
 
+/// The crypto_box_keypair function returns a tuple with public key and secret key as Vec\<u8\> respectively.
+/// The results had CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES, CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES
+/// sizes respectively and are not hex encoded. crypto_box_keypair may fail, and if it, None is returned.
+/// 
+/// ## Examples
+/// 
+/// ```
+/// use libnacl::crypto_box::*;
+/// 
+/// let (pk, sk) = crypto_box_keypair().unwrap();
+/// assert_eq!(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES, pk.len());
+/// assert_eq!(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES, sk.len());
+/// ```
 pub fn crypto_box_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
     let mut public_key = [0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES];
     let mut secret_key = [0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES];
@@ -20,6 +33,30 @@ pub fn crypto_box_keypair() -> Option<(Vec<u8>, Vec<u8>)> {
     }
 }
 
+/// The crypto_box function encrypts and authenticates a message m using the sender's secret key sk, the receiver's public key pk, and a nonce.
+/// The crypto_box function returns the resulting ciphertext. The function raises an exception if sk.len() is not CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES or if pk.len()
+/// is not CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES or if nonce.len() is not CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES.
+/// The result message is has trailing zeros CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES size in addition to its message size.
+/// 
+/// ## Examples
+/// 
+/// ```
+/// use libnacl::crypto_box::*;
+/// 
+/// let (pk, sk) = crypto_box_keypair().unwrap();
+/// let message = "The quick brown fox jumps over the lazy dog";
+/// let nonce = Vec::<u8>::with_capacity(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES);
+/// let result = crypto_box(message.as_bytes().to_vec(), nonce, pk, sk).unwrap();
+/// 
+/// assert_eq!(
+///     &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+///      &result[..16]
+/// );
+/// assert_eq!(
+///     CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES + message.len(),
+///     result.len()
+/// );
+/// ``` 
 pub fn crypto_box(message: Vec<u8>, nonce: Vec<u8>, pk: Vec<u8>, sk: Vec<u8>) -> Option<Vec<u8>> {
     let mut owned_message_zeros = vec![0u8; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES];
     owned_message_zeros.extend_from_slice(&message);
