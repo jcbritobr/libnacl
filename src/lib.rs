@@ -52,6 +52,10 @@ pub mod crypto_hash;
 /// public key can then use it to validate that your messages are actually authentic.
 pub mod crypto_sign;
 
+pub mod crypto_secret_box;
+pub mod errors;
+pub mod crypto_constants;
+
 #[cfg(test)]
 mod tests {
     

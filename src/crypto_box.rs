@@ -134,7 +134,7 @@ mod tests {
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES,
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_PUBLIC_KEY_BYTES,
         CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_SECRET_KEY_BYTES,
-        CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES,
+        CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_ZEROBYTES, CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_BOXZEROBYTES,
     };
 
     #[test]
@@ -157,7 +157,7 @@ mod tests {
         let nonce = Vec::<u8>::with_capacity(CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_NONCEBYTES);
         let result = crypto_box(message.as_bytes().to_vec(), nonce, pk, sk).unwrap();
         assert_eq!(
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            &[0; CRYPTO_BOX_CURVE_25519XSALSA20POLY1305_BOXZEROBYTES],
             &result[..16]
         );
         assert_eq!(
