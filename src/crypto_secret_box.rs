@@ -1,6 +1,6 @@
 use crate::{
     crypto_constants::*,
-    errors::{self, Result},
+    errors::{self, check_crypto_error, Result},
 };
 
 pub fn crypto_secret_box(message: Vec<u8>, nonce: Vec<u8>, sk: Vec<u8>) -> Result<Vec<u8>> {
@@ -24,20 +24,6 @@ pub fn crypto_secret_box(message: Vec<u8>, nonce: Vec<u8>, sk: Vec<u8>) -> Resul
             Ok(cypher_text)
         }
     }
-}
-
-fn check_crypto_error(sk: &Vec<u8>, nonce: &Vec<u8>) -> Result<()> {
-    if sk.len() != CURVE_25519XSALSA20POLY1305_KEY_BYTES {
-        return Err(errors::CryptoError::KeySizeError(String::from(
-            "Wrong key size",
-        )));
-    }
-    if nonce.len() != CURVE_25519XSALSA20POLY1305_NONCEBYTES {
-        return Err(errors::CryptoError::NonceSizeError(String::from(
-            "Wrong nonce size",
-        )));
-    }
-    Ok(())
 }
 
 pub fn crypto_secret_box_open(
@@ -84,6 +70,8 @@ extern "C" {
 
 #[cfg(test)]
 mod tests {
+    use crate::errors::CryptoError;
+
     use super::*;
 
     #[test]
@@ -104,6 +92,36 @@ mod tests {
             CURVE_25519XSALSA20POLY1305_ZEROBYTES + message.len(),
             result.len()
         );
+    }
+
+    #[test]
+    fn test_crypto_secret_box_fail_with_wrong_key_size() {
+        let sk: Vec<u8> = (0..CURVE_25519XSALSA20POLY1305_KEY_BYTES - 8)
+            .map(|d| d as u8)
+            .collect();
+
+        let message = "The quick brown fox jumps over the lazy dog";
+        let nonce = vec![0u8; CURVE_25519XSALSA20POLY1305_NONCEBYTES];
+        let result = crypto_secret_box(message.as_bytes().to_vec(), nonce, sk);
+        assert_eq!(
+            Err(CryptoError::KeySizeError(String::from("Wrong key size"))),
+            result
+        )
+    }
+
+    #[test]
+    fn test_crypto_secret_box_fail_with_wrong_nonce_size() {
+        let sk: Vec<u8> = (0..CURVE_25519XSALSA20POLY1305_KEY_BYTES)
+            .map(|d| d as u8)
+            .collect();
+
+        let message = "The quick brown fox jumps over the lazy dog";
+        let nonce = vec![0u8; CURVE_25519XSALSA20POLY1305_NONCEBYTES - 3];
+        let result = crypto_secret_box(message.as_bytes().to_vec(), nonce, sk);
+        assert_eq!(
+            Err(CryptoError::NonceSizeError(String::from("Wrong nonce size"))),
+            result
+        )
     }
 
     #[test]
